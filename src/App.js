@@ -1,18 +1,39 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      foods: [],
+    }
+  }
+
+  componentDidMount() {
+
+    fetch('https://murraywilliams.co.za/eatz/wp-json/wp/v2/food')
+      .then(res => res.json())
+      .then(res => {
+        this.setState({
+          foods: res
+        })
+      });
+  }
+
   render() {
+
+    let foods = this.state.foods.map((food, index) => {
+      return <div key={index}>
+        <h3>{food.title.rendered}</h3>
+        <p>{food.acf.desc}</p>
+        <img width="120px" src={food.acf.image} />
+      </div>
+    });
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+      <h1>Foods</h1>
+      {foods}
       </div>
     );
   }
