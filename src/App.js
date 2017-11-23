@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
+import Menu from './Menu'
+import Order from './Order'
 
 class App extends Component {
   constructor(props) {
@@ -10,6 +12,8 @@ class App extends Component {
       order: [],
       loaded:false
     }
+    this.handleAddOrder = this.handleAddOrder.bind(this);
+    this.handleDeleteOrder = this.handleDeleteOrder.bind(this);
   }
 
   componentDidMount() {
@@ -38,7 +42,6 @@ class App extends Component {
     }
 
     handleAddOrder(index) {
-
       const name = this.state.foods[index].name;
       const price = this.state.foods[index].price;
 
@@ -59,31 +62,11 @@ class App extends Component {
 
   render() {
 
-    let foods = this.state.foods.map((food, index) => {
-      return <div key={index}>
-        <h3>{food.name}</h3>
-        <p><i>R{food.price}.00</i></p>
-        <p>{food.desc}</p>
-        <img width="120px" src={food.image} />
-        <p><button onClick={() => this.handleAddOrder(index)}>Add to Order</button></p>
-        <hr />
-      </div>
-
-    });
-    let order = this.state.order.map((ord, index) => {
-      return <div>
-        <p>{ord.name}</p>
-        <p>{ord.price}</p>
-        <p><button onClick={() => this.handleDeleteOrder(index)}>Remove Order</button></p>
-      </div>
-    });
     if(this.state.loaded){
       return (
         <div className="App">
-        <h1>Foods</h1>
-        {foods}
-        <h1>Order</h1>
-        {order}
+        <Menu foods={this.state.foods} addOrder={this.handleAddOrder}/>
+        <Order order={this.state.order} deleteOrder={this.handleDeleteOrder}/>
         </div>
       );
     }
