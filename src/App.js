@@ -8,11 +8,16 @@ class App extends Component {
     this.state = {
       foods: [],
       order: [],
+      loaded:false
     }
   }
 
   componentDidMount() {
     let newRes;
+
+    this.setState({
+      loaded:false
+    })
     fetch('https://murraywilliams.co.za/eatz/wp-json/wp/v2/food')
       .then(res => res.json())
       .then(res => {
@@ -26,7 +31,8 @@ class App extends Component {
           })
         })
         this.setState ({
-          foods: newRes
+          foods: newRes,
+          loaded:true
         });
       })
     }
@@ -41,6 +47,14 @@ class App extends Component {
         order: [...prevState.order, {name: name, price: price}]
       }));
 
+    }
+
+    handleDeleteOrder(index) {
+      
+      this.setState(prevState => ({
+          order: prevState.order.filter((_,i)  => i !== index)
+      }))
+      
     }
 
   render() {
@@ -60,16 +74,22 @@ class App extends Component {
       return <div>
         <p>{ord.name}</p>
         <p>{ord.price}</p>
+        <p><button onClick={() => this.handleDeleteOrder(index)}>Remove Order</button></p>
       </div>
     });
-    return (
-      <div className="App">
-      <h1>Foods</h1>
-      {foods}
-      <h1>Order</h1>
-      {order}
-      </div>
-    );
+    if(this.state.loaded){
+      return (
+        <div className="App">
+        <h1>Foods</h1>
+        {foods}
+        <h1>Order</h1>
+        {order}
+        </div>
+      );
+    }
+    else {
+      return "loading..."
+    }
   }
 }
 
