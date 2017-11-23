@@ -29,8 +29,19 @@ class App extends Component {
           foods: newRes
         });
       })
-      console.log(newRes);
-  }
+    }
+
+    handleAddOrder(index) {
+
+      const name = this.state.foods[index].name;
+      const price = this.state.foods[index].price;
+
+      // uses new React updater function
+      this.setState(prevState => ({
+        order: [...prevState.order, {name: name, price: price}]
+      }));
+
+    }
 
   render() {
 
@@ -40,12 +51,23 @@ class App extends Component {
         <p><i>R{food.price}.00</i></p>
         <p>{food.desc}</p>
         <img width="120px" src={food.image} />
+        <p><button onClick={() => this.handleAddOrder(index)}>Add to Order</button></p>
+        <hr />
+      </div>
+
+    });
+    let order = this.state.order.map((ord, index) => {
+      return <div>
+        <p>{ord.name}</p>
+        <p>{ord.price}</p>
       </div>
     });
     return (
       <div className="App">
       <h1>Foods</h1>
       {foods}
+      <h1>Order</h1>
+      {order}
       </div>
     );
   }
