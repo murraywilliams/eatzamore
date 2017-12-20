@@ -64,7 +64,8 @@ class App extends Component {
 
     if(this.state.loaded){
       return (
-        <div className="App">
+        <div className="App"> 
+        <h1>EATZAMORE</h1>
         <Menu foods={this.state.foods} addOrder={this.handleAddOrder}/>
         <Order order={this.state.order} deleteOrder={this.handleDeleteOrder}/>
         </div>
