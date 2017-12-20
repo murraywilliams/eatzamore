@@ -53,19 +53,19 @@ class App extends Component {
     }
 
     handleDeleteOrder(index) {
-      
+
       this.setState(prevState => ({
           order: prevState.order.filter((_,i)  => i !== index)
       }))
-      
+
     }
 
   render() {
 
     if(this.state.loaded){
       return (
-        <div className="App"> 
-        <h1>EATZAMORE version Alpha 0.1</h1>
+        <div className="App">
+        <h1>EATZAMORE <span>version Alpha 0.1</span></h1>
         <Menu foods={this.state.foods} addOrder={this.handleAddOrder}/>
         <Order order={this.state.order} deleteOrder={this.handleDeleteOrder}/>
         </div>

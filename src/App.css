@@ -26,3 +26,8 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+.App h1 span {
+  font-size: 14px;
+  font-weight: normal;
+  display: block;
+}
