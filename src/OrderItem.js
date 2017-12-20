@@ -5,7 +5,7 @@ const Order = (props) => {
         <div>
             <p>{props.orderInfo.name}</p>
             <p>{props.orderInfo.price}</p>
-            <p><button onClick={() => props.deleteOrder(props.uniqueID)}>Remove Order</button></p>
+            <p><button onClick={() => props.deleteOrder(props.uniqueID)}>X</button></p>
         </div>
     )
 }
