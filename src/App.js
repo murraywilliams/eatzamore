@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import Menu from './Menu'
 import Order from './Order'
+import WPAPI from 'wpapi';
 
 class App extends Component {
   constructor(props) {
@@ -17,6 +18,16 @@ class App extends Component {
   }
 
   componentDidMount() {
+
+    //Add CRUD operations to the REST API
+    this.wp = new WPAPI({ 
+      endpoint: 'https://murraywilliams.co.za/eatz/wp-json',
+      username: 'adm',
+      password: 'voBFt^Xm8&E&wx^BPM' });
+
+    this.wp.orders = this.wp.registerRoute( 'wp/v2', '/orders/' );
+
+    //fetch all the food items from the Wordpress REST API
     let newRes;
 
     this.setState({
@@ -41,10 +52,40 @@ class App extends Component {
       })
     }
 
+    //The below adds the order list into the WP database via the REST API
+    handleConfirmOrder = () => {
+      
+      this.wp.orders().create({
+        // "title" and "content" are the only required properties
+        title: 'Your Post Title2',
+        fields: {
+            orders: this.state.order
+          // orders:[
+          //   {
+          //     food_item: "product name",
+          //     price: 255,
+          //   },
+          //   {
+          //     food_item: "product name",
+          //     price: 255,
+          //   }
+          // ]
+        },
+        // Post will be created as a draft by default if a specific "status"
+        // is not specified
+        status: 'publish'
+      }).then(function( response ) {
+          // "response" will hold all properties of your newly-created post,
+          // including the unique `id` the post was assigned on creation
+          console.log( response.id );
+      })
+    }
+
+    // add an item to the order list
     handleAddOrder(index) {
       const name = this.state.foods[index].name;
       const price = this.state.foods[index].price;
-
+      console.log(this.state);
       // uses new React updater function
       this.setState(prevState => ({
         order: [...prevState.order, {name: name, price: price}]
@@ -52,6 +93,7 @@ class App extends Component {
 
     }
 
+    //Delete an item from the order list
     handleDeleteOrder(index) {
       
       this.setState(prevState => ({
@@ -68,6 +110,7 @@ class App extends Component {
         <h1>EATZAMORE version Alpha 0.1</h1>
         <Menu foods={this.state.foods} addOrder={this.handleAddOrder}/>
         <Order order={this.state.order} deleteOrder={this.handleDeleteOrder}/>
+        <button onClick={this.handleConfirmOrder}>Send order to kitchen</button>
         </div>
       );
     }
