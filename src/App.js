@@ -20,7 +20,7 @@ class App extends Component {
   componentDidMount() {
 
     //Add CRUD operations to the REST API
-    this.wp = new WPAPI({ 
+    this.wp = new WPAPI({
       endpoint: 'https://murraywilliams.co.za/eatz/wp-json',
       username: 'adm',
       password: 'voBFt^Xm8&E&wx^BPM' });
@@ -54,10 +54,10 @@ class App extends Component {
 
     //The below adds the order list into the WP database via the REST API
     handleConfirmOrder = () => {
-      
+
       this.wp.orders().create({
         // "title" and "content" are the only required properties
-        title: 'Your Post Title2',
+        title: 'Ord#201',
         fields: {
             orders: this.state.order
           // orders:[
@@ -78,6 +78,7 @@ class App extends Component {
           // "response" will hold all properties of your newly-created post,
           // including the unique `id` the post was assigned on creation
           console.log( response.id );
+          alert('Order has been sent!');
       })
     }
 
@@ -95,18 +96,18 @@ class App extends Component {
 
     //Delete an item from the order list
     handleDeleteOrder(index) {
-      
+
       this.setState(prevState => ({
           order: prevState.order.filter((_,i)  => i !== index)
       }))
-      
+
     }
 
   render() {
 
     if(this.state.loaded){
       return (
-        <div className="App"> 
+        <div className="App">
         <h1>EATZAMORE version Alpha 0.1</h1>
         <Menu foods={this.state.foods} addOrder={this.handleAddOrder}/>
         <Order order={this.state.order} deleteOrder={this.handleDeleteOrder}/>
