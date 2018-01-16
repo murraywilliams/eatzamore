@@ -7,7 +7,7 @@ const FoodItem = (props) => {
             <p><i>R{props.foodInfo.price}.00</i></p>
             <p>{props.foodInfo.desc}</p>
             <img width="120px" src={props.foodInfo.image} alt={props.foodInfo.name}/>
-            <p><button onClick={() => props.addOrder(props.uniqueID)}>Add to Order</button></p>
+            <p><button onClick={() => props.addOrder(props.foodInfo.name)}>Add to Order</button></p>
             <hr />
         </div>
     )

@@ -1,15 +1,16 @@
 import React from 'react'
 import FoodItem from './FoodItem'
+import Filters from './Filters'
 
 const Menu = (props) => {
-
+    
     let foods = props.foods.map((food, index) => {
-        return <FoodItem foodInfo={food} uniqueID={index} key={index} addOrder={props.addOrder} />
+        return <FoodItem foodInfo={food} key={index} addOrder={props.addOrder} />
     });
 
     return ( 
         <div>
-            <h1>Foods</h1>
+            <Filters categories={props.categories} filterMenu={props.filterMenu}/>
             {foods}
         </div>
     )

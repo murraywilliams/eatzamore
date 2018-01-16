@@ -10,30 +10,31 @@ class App extends Component {
 
     this.state = {
       foods: [],
+      filteredFoods: [],
+      foodCategories: [],
       order: [],
+      orderComments:'',
       loaded:false
     }
-    this.handleAddOrder = this.handleAddOrder.bind(this);
-    this.handleDeleteOrder = this.handleDeleteOrder.bind(this);
   }
 
   componentDidMount() {
-
+    // console.log("The environment variable is: ",process.env);
     //Add CRUD operations to the REST API
     this.wp = new WPAPI({
-      endpoint: 'https://murraywilliams.co.za/eatz/wp-json',
-      username: 'adm',
-      password: 'voBFt^Xm8&E&wx^BPM' });
+      endpoint: process.env.REACT_APP_API_URL,
+      username: process.env.REACT_APP_USERNAME,
+      password: process.env.REACT_APP_PASSWORD});
 
     this.wp.orders = this.wp.registerRoute( 'wp/v2', '/orders/' );
 
     //fetch all the food items from the Wordpress REST API
-    let newRes;
+    let newRes, foodCategories;
 
     this.setState({
       loaded:false
     })
-    fetch('https://murraywilliams.co.za/eatz/wp-json/wp/v2/food')
+    fetch(`${process.env.REACT_APP_API_URL}/wp/v2/food?_embed`)
       .then(res => res.json())
       .then(res => {
         newRes = res.map((data) => {
@@ -43,11 +44,21 @@ class App extends Component {
             desc: data.acf.desc,
             price: data.acf.price,
             image: data.acf.image,
+            category: data._embedded["wp:term"][0][0].name
           })
         })
+        foodCategories = newRes.map((item)=>{
+          return item.category;
+        }).filter(function(elem, index, self) {
+          return index === self.indexOf(elem);
+        });
+        foodCategories.unshift("all");
+
         this.setState ({
           foods: newRes,
-          loaded:true
+          loaded:true,
+          foodCategories,
+          filteredFoods:newRes 
         });
       })
     }
@@ -59,7 +70,8 @@ class App extends Component {
         // "title" and "content" are the only required properties
         title: 'Ord#201',
         fields: {
-            orders: this.state.order
+            orders: this.state.order,
+            order_comments: this.state.orderComments
           // orders:[
           //   {
           //     food_item: "product name",
@@ -83,10 +95,11 @@ class App extends Component {
     }
 
     // add an item to the order list
-    handleAddOrder(index) {
+    handleAddOrder = (foodName) =>{
+
+      const index = this.state.foods.findIndex(val=> val.name===foodName);
       const name = this.state.foods[index].name;
       const price = this.state.foods[index].price;
-      console.log(this.state);
       // uses new React updater function
       this.setState(prevState => ({
         order: [...prevState.order, {name: name, price: price}]
@@ -95,12 +108,28 @@ class App extends Component {
     }
 
     //Delete an item from the order list
-    handleDeleteOrder(index) {
+    handleDeleteOrder = (index) => {
 
       this.setState(prevState => ({
           order: prevState.order.filter((_,i)  => i !== index)
       }))
 
+    }
+
+    handleCommentChange = (event) => {
+      this.setState({orderComments: event.target.value});
+    }
+
+    handleFilterMenu = (activeCategory) =>{
+
+      let filteredFoods = this.state.foods.slice();
+      
+      if(activeCategory!=="all"){
+        filteredFoods = filteredFoods.filter((food) => food.category === activeCategory);
+      }
+      
+      this.setState({filteredFoods});
+      
     }
 
   render() {
@@ -109,8 +138,22 @@ class App extends Component {
       return (
         <div className="App">
         <h1>EATZAMORE version Alpha 0.1</h1>
-        <Menu foods={this.state.foods} addOrder={this.handleAddOrder}/>
-        <Order order={this.state.order} deleteOrder={this.handleDeleteOrder}/>
+        <h2>Foods</h2>
+        <Menu 
+          foods={this.state.filteredFoods}
+          categories={this.state.foodCategories}
+          filterMenu={this.handleFilterMenu}
+          addOrder={this.handleAddOrder}
+        />
+        <Order 
+          order={this.state.order}
+          deleteOrder={this.handleDeleteOrder}
+        />
+        <textarea 
+          onChange={this.handleCommentChange}
+          value={this.state.orderComments}
+          placeholder="Special comments for Order">
+        </textarea>
         <button onClick={this.handleConfirmOrder}>Send order to kitchen</button>
         </div>
       );
