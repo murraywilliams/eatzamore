@@ -19,7 +19,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    // console.log("The environment variable is: ",process.env);
+    console.log("The environment variable is: ",process.env);
     //Add CRUD operations to the REST API
     this.wp = new WPAPI({
       endpoint: process.env.REACT_APP_API_URL,
@@ -58,7 +58,7 @@ class App extends Component {
           foods: newRes,
           loaded:true,
           foodCategories,
-          filteredFoods:newRes 
+          filteredFoods:newRes
         });
       })
     }
@@ -123,13 +123,13 @@ class App extends Component {
     handleFilterMenu = (activeCategory) =>{
 
       let filteredFoods = this.state.foods.slice();
-      
+
       if(activeCategory!=="all"){
         filteredFoods = filteredFoods.filter((food) => food.category === activeCategory);
       }
-      
+
       this.setState({filteredFoods});
-      
+
     }
 
   render() {
@@ -139,17 +139,17 @@ class App extends Component {
         <div className="App">
         <h1>EATZAMORE version Alpha 0.1</h1>
         <h2>Foods</h2>
-        <Menu 
+        <Menu
           foods={this.state.filteredFoods}
           categories={this.state.foodCategories}
           filterMenu={this.handleFilterMenu}
           addOrder={this.handleAddOrder}
         />
-        <Order 
+        <Order
           order={this.state.order}
           deleteOrder={this.handleDeleteOrder}
         />
-        <textarea 
+        <textarea
           onChange={this.handleCommentChange}
           value={this.state.orderComments}
           placeholder="Special comments for Order">
