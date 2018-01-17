@@ -95,9 +95,9 @@ class App extends Component {
     }
 
     // add an item to the order list
-    handleAddOrder = (foodName) =>{
+    handleAddOrder = (foodName) => {
 
-      const index = this.state.foods.findIndex(val=> val.name===foodName);
+      const index = this.state.foods.findIndex(val => val.name === foodName);
       const name = this.state.foods[index].name;
       const price = this.state.foods[index].price;
       // uses new React updater function
