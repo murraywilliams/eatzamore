@@ -65,13 +65,15 @@ class App extends Component {
 
     //The below adds the order list into the WP database via the REST API
     handleConfirmOrder = () => {
-
+      // Grab current time in seconds to serve as order number
+      const timestamp = 'Ord-' + String(Math.round(new Date().getTime()/1000));
       this.wp.orders().create({
         // "title" and "content" are the only required properties
-        title: 'Ord#201',
+        title: timestamp,
         fields: {
             orders: this.state.order,
-            order_comments: this.state.orderComments
+            order_comments: this.state.orderComments,
+            order_number: this.state.timestamp
           // orders:[
           //   {
           //     food_item: "product name",
@@ -100,9 +102,11 @@ class App extends Component {
       const index = this.state.foods.findIndex(val => val.name === foodName);
       const name = this.state.foods[index].name;
       const price = this.state.foods[index].price;
+      // grab current time and push to order
+      const timestamp = Math.round(new Date().getTime()/1000);
       // uses new React updater function
       this.setState(prevState => ({
-        order: [...prevState.order, {name: name, price: price}]
+        order: [...prevState.order, {name, price,timestamp}]
       }));
 
     }
