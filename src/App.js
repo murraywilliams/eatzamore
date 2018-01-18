@@ -3,6 +3,11 @@ import './App.css';
 import Menu from './Menu'
 import Order from './Order'
 import WPAPI from 'wpapi';
+import styled from 'styled-components';
+// import 'bootstrap/dist/js/bootstrap.js';
+import 'bootstrap/dist/css/bootstrap.css';
+global.jQuery = require('jquery');
+require('bootstrap');
 
 class App extends Component {
   constructor(props) {
