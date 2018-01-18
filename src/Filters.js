@@ -1,9 +1,16 @@
-import React from 'react'
+import React from 'react';
+import styled from 'styled-components';
+
+const FilterButton = styled.button`
+    background-color: #D65C40;
+    color: white;
+    padding: 5px;
+`
 
 const Filters = (props) => {
 
     const filters = props.categories.map((category)=>{
-        return <button className="btn-group btn-primary" key={`filter-${category}`} onClick={() =>props.filterMenu(category)}>{category}</button>
+        return <FilterButton key={`filter-${category}`} onClick={() =>props.filterMenu(category)}>{category}</FilterButton>
     });
 
     return (
