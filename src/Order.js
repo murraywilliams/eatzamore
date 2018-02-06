@@ -1,5 +1,6 @@
 import React from 'react'
 import OrderItem from './OrderItem'
+import styled from 'styled-components';
 
 const Order = (props) =>{
     
@@ -8,11 +9,29 @@ const Order = (props) =>{
     })
 
     return (
-        <div>
-            <h1>Order</h1>
+        <OrderWrapper>
+            <h1>ORDER</h1>
             {order}
-        </div>
+        </OrderWrapper>
     )
 }
+
+const OrderWrapper = styled.div`
+    width:100%;
+
+    & h1 {
+        color:#d85a41;
+    }
+
+    & p {
+        color:white;
+        display:inline-block;
+        margin:0 5px;
+    }
+
+    & p button {
+        background:none;
+    }
+`;
 
 export default Order

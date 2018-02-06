@@ -4,10 +4,11 @@ import Menu from './Menu'
 import Order from './Order'
 import WPAPI from 'wpapi';
 import styled from 'styled-components';
-// import 'bootstrap/dist/js/bootstrap.js';
 import 'bootstrap/dist/css/bootstrap.css';
+import * as Images from './Images';
 global.jQuery = require('jquery');
-require('bootstrap');
+
+
 
 class App extends Component {
   constructor(props) {
@@ -18,30 +19,35 @@ class App extends Component {
       filteredFoods: [],
       foodCategories: [],
       order: [],
-      orderComments:'',
-      loaded:false
+      orderComments: '',
+      loaded: false,
+      sendingData: false
     }
   }
 
   componentDidMount() {
-    console.log("The environment variable is: ",process.env);
+    console.log("The environment variable is: ", process.env);
     //Add CRUD operations to the REST API
     this.wp = new WPAPI({
       endpoint: process.env.REACT_APP_API_URL,
       username: process.env.REACT_APP_USERNAME,
-      password: process.env.REACT_APP_PASSWORD});
+      password: process.env.REACT_APP_PASSWORD
+    });
 
-    this.wp.orders = this.wp.registerRoute( 'wp/v2', '/orders/' );
+    this.wp.orders = this.wp.registerRoute('wp/v2', '/orders/');
 
-    //fetch all the food items from the Wordpress REST API
+    //fetch all the food items and categories from the Wordpress REST API
     let newRes, foodCategories;
 
     this.setState({
-      loaded:false
+      loaded: false
     })
+
+    //fetch all the food and save in state
     fetch(`${process.env.REACT_APP_API_URL}/wp/v2/food?_embed`)
       .then(res => res.json())
       .then(res => {
+        
         newRes = res.map((data) => {
           return ({
             id: data.id,
@@ -49,128 +55,197 @@ class App extends Component {
             desc: data.acf.desc,
             price: data.acf.price,
             image: data.acf.image,
+            // categories: this.loopCategories(data._embedded["wp:term"][0])
             category: data._embedded["wp:term"][0][0].name
           })
         })
-        foodCategories = newRes.map((item)=>{
-          return item.category;
-        }).filter(function(elem, index, self) {
-          return index === self.indexOf(elem);
-        });
-        foodCategories.unshift("all");
 
-        this.setState ({
+        this.setState({
           foods: newRes,
-          loaded:true,
-          foodCategories,
-          filteredFoods:newRes
+          loaded: true,
+          filteredFoods: newRes
         });
       })
-    }
 
-    //The below adds the order list into the WP database via the REST API
-    handleConfirmOrder = () => {
-      // Grab current time in seconds to serve as order number
-      const timestamp = 'Ord-' + String(Math.round(new Date().getTime()/1000));
-      this.wp.orders().create({
-        // "title" and "content" are the only required properties
-        title: timestamp,
-        fields: {
-            orders: this.state.order,
-            order_comments: this.state.orderComments,
-            order_number: this.state.timestamp
-          // orders:[
-          //   {
-          //     food_item: "product name",
-          //     price: 255,
-          //   },
-          //   {
-          //     food_item: "product name",
-          //     price: 255,
-          //   }
-          // ]
-        },
-        // Post will be created as a draft by default if a specific "status"
-        // is not specified
-        status: 'publish'
-      }).then(function( response ) {
-          // "response" will hold all properties of your newly-created post,
-          // including the unique `id` the post was assigned on creation
-          console.log( response.id );
-          alert('Order has been sent!');
+      //fetch all the food categories
+      fetch(`${process.env.REACT_APP_API_URL}/wp/v2/categories`)
+      .then(res => res.json())
+      .then(res => {
+        foodCategories = res.map((category)=>{
+          return category.name
+        })
+
+        this.setState({foodCategories})
       })
+  }
+
+  //The below adds the order list into the WP database via the REST API
+  handleConfirmOrder = () => {
+    // Grab current time in seconds to serve as order number
+    const timestamp = 'Ord-' + String(Math.round(new Date().getTime() / 1000));
+    this.setState({ sendingData: true });
+    this.wp.orders().create({
+      // "title" and "content" are the only required properties
+      title: timestamp,
+      fields: {
+        orders: this.state.order,
+        order_comments: this.state.orderComments,
+        order_number: this.state.timestamp
+        // orders:[
+        //   {
+        //     food_item: "product name",
+        //     price: 255,
+        //   },
+        //   {
+        //     food_item: "product name",
+        //     price: 255,
+        //   }
+        // ]
+      },
+      // Post will be created as a draft by default if a specific "status"
+      // is not specified
+      status: 'publish'
+    }).then(function (response) {
+      // "response" will hold all properties of your newly-created post,
+      // including the unique `id` the post was assigned on creation
+      console.log(response.id);
+      alert('Order has been sent!');
+      this.setState({ sendingData: false });
+    })
+  }
+
+  // add an item to the order list
+  handleAddOrder = (foodName) => {
+
+    const index = this.state.foods.findIndex(val => val.name === foodName);
+    const name = this.state.foods[index].name;
+    const price = this.state.foods[index].price;
+    // grab current time and push to order
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    // uses new React updater function
+    this.setState(prevState => ({
+      order: [...prevState.order, { name, price, timestamp }]
+    }));
+
+  }
+
+  //Delete an item from the order list
+  handleDeleteOrder = (index) => {
+
+    this.setState(prevState => ({
+      order: prevState.order.filter((_, i) => i !== index)
+    }))
+
+  }
+
+  handleCommentChange = (event) => {
+    this.setState({ orderComments: event.target.value });
+  }
+
+  handleFilterMenu = (activeCategory) => {
+
+    let filteredFoods = this.state.foods.slice();
+
+    if (activeCategory !== "All") {
+      filteredFoods = filteredFoods.filter((food) => food.category === activeCategory);
     }
 
-    // add an item to the order list
-    handleAddOrder = (foodName) => {
+    this.setState({ filteredFoods });
 
-      const index = this.state.foods.findIndex(val => val.name === foodName);
-      const name = this.state.foods[index].name;
-      const price = this.state.foods[index].price;
-      // grab current time and push to order
-      const timestamp = Math.round(new Date().getTime()/1000);
-      // uses new React updater function
-      this.setState(prevState => ({
-        order: [...prevState.order, {name, price,timestamp}]
-      }));
+  }
 
-    }
-
-    //Delete an item from the order list
-    handleDeleteOrder = (index) => {
-
-      this.setState(prevState => ({
-          order: prevState.order.filter((_,i)  => i !== index)
-      }))
-
-    }
-
-    handleCommentChange = (event) => {
-      this.setState({orderComments: event.target.value});
-    }
-
-    handleFilterMenu = (activeCategory) =>{
-
-      let filteredFoods = this.state.foods.slice();
-
-      if(activeCategory!=="all"){
-        filteredFoods = filteredFoods.filter((food) => food.category === activeCategory);
-      }
-
-      this.setState({filteredFoods});
-
-    }
+  loadingIcon = () => {
+    return <p>Sending order to Kitchen...</p>
+  }
 
   render() {
 
-    if(this.state.loaded){
+    if (this.state.loaded) {
       return (
-        <div className="App">
-        <h1>EATZAMORE version Alpha 0.1</h1>
-        <h2>Foods</h2>
-        <Menu
-          foods={this.state.filteredFoods}
-          categories={this.state.foodCategories}
-          filterMenu={this.handleFilterMenu}
-          addOrder={this.handleAddOrder}
-        />
-        <Order
-          order={this.state.order}
-          deleteOrder={this.handleDeleteOrder}
-        />
-        <textarea
-          onChange={this.handleCommentChange}
-          value={this.state.orderComments}
-          placeholder="Special comments for Order">
-        </textarea>
-        <button onClick={this.handleConfirmOrder}>Send order to kitchen</button>
-        </div>
+        <AppContainer className="App">
+          <Content>
+            <LeftContainer>
+              <Header>
+                <img src={Images.Logo} alt="Eatzamore Logo" />
+              </Header>
+              <Menu
+                foods={this.state.filteredFoods}
+                categories={this.state.foodCategories}
+                filterMenu={this.handleFilterMenu}
+                addOrder={this.handleAddOrder}
+              />
+            </LeftContainer>
+            <RightContainer>
+              <Order
+                order={this.state.order}
+                deleteOrder={this.handleDeleteOrder}
+              />
+              <hr/>
+              <p>Add your order comments:</p>
+              <textarea
+                onChange={this.handleCommentChange}
+                value={this.state.orderComments}
+                placeholder="Special comments for Order">
+              </textarea>
+              <Submit onClick={this.handleConfirmOrder}>Send order to kitchen</Submit>
+              {this.state.sendingData ? this.loadingIcon() : ''}
+            </RightContainer>
+          </Content>
+        </AppContainer>
       );
     }
     else {
-      return "loading..."
+      return "Loading...";
     }
   }
 }
+
+const AppContainer = styled.div`
+  background: url(${Images.Background});
+  min-height:100vh;
+`;
+
+const Header = styled.div`
+  width:100%;
+  display:flex;
+  justify-content:flex-start;
+  padding:20px;
+`;
+
+const Content = styled.div`
+  display:flex;
+`;
+
+const RightContainer = styled.div`
+  width:30%;
+  margin:0 7%;
+  background:rgba(0,0,0,0.5);
+  color:white;
+  text-align:center;
+
+  & hr {
+    height:5px;
+    background:white;
+    width:80%;
+  }
+  & textarea {
+    display:inline-block;
+    border:0;
+    width:80%;
+  }
+
+`;
+
+const Submit = styled.button`
+  background:#d85a41;
+  color:white;
+  border:0;
+  padding:10px 20px;
+`;
+
+const LeftContainer = styled.div`
+  width:54%;
+  margin-left:2%;
+`;
 
 export default App;

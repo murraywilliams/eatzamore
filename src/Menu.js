@@ -1,6 +1,7 @@
 import React from 'react'
 import FoodItem from './FoodItem'
 import Filters from './Filters'
+import styled from 'styled-components';
 
 const Menu = (props) => {
     
@@ -9,11 +10,15 @@ const Menu = (props) => {
     });
 
     return ( 
-        <div>
+        <MenuWrapper>
             <Filters categories={props.categories} filterMenu={props.filterMenu}/>
             {foods}
-        </div>
+        </MenuWrapper>
     )
 }
+
+const MenuWrapper = styled.div`
+    width:100%;
+`;
 
 export default Menu
