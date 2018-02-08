@@ -47,7 +47,7 @@ class App extends Component {
     fetch(`${process.env.REACT_APP_API_URL}/wp/v2/food?_embed`)
       .then(res => res.json())
       .then(res => {
-        
+
         newRes = res.map((data) => {
           return ({
             id: data.id,
@@ -202,6 +202,8 @@ class App extends Component {
 
 const AppContainer = styled.div`
   background: url(${Images.Background});
+  background-repeat: no-repeat;
+  background-size: cover;
   min-height:100vh;
 `;
 
@@ -232,8 +234,8 @@ const RightContainer = styled.div`
     display:inline-block;
     border:0;
     width:80%;
+    color: black;
   }
-
 `;
 
 const Submit = styled.button`
