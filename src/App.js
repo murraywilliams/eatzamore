@@ -24,6 +24,7 @@ class App extends Component {
       loaded: false,
       sendingData: false
     }
+
   }
 
   componentDidMount() {
@@ -39,7 +40,7 @@ class App extends Component {
 
     // Combined fetch request using async/await
     let newRes, foodCategories;
-    async function fetchData () {
+    const fetchData = async () => {
       try {
         const fetchFood = axios(`${process.env.REACT_APP_API_URL}/wp/v2/food?_embed`);
         const fetchCategories = axios(`${process.env.REACT_APP_API_URL}/wp/v2/categories`);
