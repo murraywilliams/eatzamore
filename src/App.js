@@ -3,6 +3,7 @@ import './App.css';
 import Menu from './Menu'
 import Order from './Order'
 import WPAPI from 'wpapi';
+import axios from 'axios';
 import styled from 'styled-components';
 import 'bootstrap/dist/css/bootstrap.css';
 import * as Images from './Images';
@@ -26,7 +27,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    console.log("The environment variable is: ", process.env);
+    // console.log("The environment variable is: ", process.env);
     //Add CRUD operations to the REST API
     this.wp = new WPAPI({
       endpoint: process.env.REACT_APP_API_URL,
@@ -36,19 +37,18 @@ class App extends Component {
 
     this.wp.orders = this.wp.registerRoute('wp/v2', '/orders/');
 
-    //fetch all the food items and categories from the Wordpress REST API
+    // Combined fetch request using async/await
     let newRes, foodCategories;
+    async function fetchData () {
+      try {
+        const fetchFood = axios(`${process.env.REACT_APP_API_URL}/wp/v2/food?_embed`);
+        const fetchCategories = axios(`${process.env.REACT_APP_API_URL}/wp/v2/categories`);
+        // await both promises to come back and destructure the result into their own variables
+        const [food, cat] = await Promise.all([fetchFood, fetchCategories]);
+        // console.log(food.data, cat.data); // poes cool
 
-    this.setState({
-      loaded: false
-    })
-
-    //fetch all the food and save in state
-    fetch(`${process.env.REACT_APP_API_URL}/wp/v2/food?_embed`)
-      .then(res => res.json())
-      .then(res => {
-
-        newRes = res.map((data) => {
+        //Save all the foods to state
+        newRes = food.data.map((data) => {
           return ({
             id: data.id,
             name: data.title.rendered,
@@ -59,24 +59,28 @@ class App extends Component {
             category: data._embedded["wp:term"][0][0].name
           })
         })
-
+        console.log(newRes);
         this.setState({
           foods: newRes,
-          loaded: true,
           filteredFoods: newRes
         });
-      })
 
-      //fetch all the food categories
-      fetch(`${process.env.REACT_APP_API_URL}/wp/v2/categories`)
-      .then(res => res.json())
-      .then(res => {
-        foodCategories = res.map((category)=>{
+        foodCategories = cat.data.map((category)=>{
           return category.name
         })
-
+        console.log(foodCategories);
         this.setState({foodCategories})
-      })
+
+        // Set loaded state to true
+      } catch (err) {
+        console.log('Eish, something wnt wrong ' + err);
+      }
+    }
+
+    this.setState({
+      loaded: true
+    })
+    fetchData();
   }
 
   //The below adds the order list into the WP database via the REST API

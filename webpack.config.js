@@ -6,6 +6,7 @@ module.exports = {
     path: path.join(__dirname, 'dist'),
     filename: 'bundle.js'
   },
+  externals: ['axios'],
   module: {
     rules: [{
       loader: 'babel-loader',
